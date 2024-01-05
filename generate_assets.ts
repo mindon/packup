@@ -391,7 +391,12 @@ class ScriptAsset implements Asset {
     }
 
     const flpath = join(base, src);
-    const info = await Deno.stat(flpath);
+    try {
+      const info = await Deno.stat(flpath);
+    } catch(err) {
+      console.debug(base, src, flpath, pathPrefix, distDir);
+      throw err;
+    }
 
     const { options, plugins } = await bundlet(flpath, pathPrefix, distDir);
     const data = await bundleByEsbuild(flpath, options, plugins);
