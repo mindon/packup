@@ -391,8 +391,9 @@ class ScriptAsset implements Asset {
     }
 
     const flpath = join(base, src);
+    let info = {};
     try {
-      const info = await Deno.stat(flpath);
+      info = await Deno.stat(flpath);
     } catch(err) {
       console.debug(base, src, flpath, pathPrefix, distDir);
       throw err;
