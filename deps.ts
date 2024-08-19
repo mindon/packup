@@ -20,7 +20,7 @@ export {
   denoPlugins,
   denoResolverPlugin,
 } from "https://deno.land/x/esbuild_deno_loader/mod.ts";
-export { build, stop } from "https://deno.land/x/esbuild@v0.23.1/mod.js";
+export { build, stop } from "https://deno.land/x/esbuild@v0.17.19/mod.js";
 export type { CommonOptions, Plugin } from "https://deno.land/x/esbuild/mod.js";
 export { exists } from "https://deno.land/std/fs/mod.ts";
 

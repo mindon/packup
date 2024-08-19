@@ -4,7 +4,7 @@ import { logger } from "./logger_util.ts";
 import { byteSize } from "./util.ts";
 import { bundleByEsbuild } from "./bundle_util.ts";
 import { denoPlugin } from "./vendor/esbuild_deno_loader/mod.ts";
-import * as esbuild from "https://deno.land/x/esbuild@v0.23.1/mod.js";
+import * as esbuild from "https://deno.land/x/esbuild@v0.17.19/mod.js";
 import * as npmLocal from "./npm_local.ts";
 
 const bx =

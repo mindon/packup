@@ -1,6 +1,6 @@
 import { basename, join } from "./deps.ts";
 import * as path from "https://deno.land/std/path/mod.ts";
-import * as esbuild from "https://deno.land/x/esbuild@v0.23.1/mod.js";
+import * as esbuild from "https://deno.land/x/esbuild@v0.17.19/mod.js";
 
 import { fm } from "./bundlet.ts";
 

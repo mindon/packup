@@ -1,4 +1,4 @@
-import * as esbuild from "https://deno.land/x/esbuild@v0.23.1/mod.js";
+import * as esbuild from "https://deno.land/x/esbuild@v0.17.19/mod.js";
 export type { esbuild };
 export {
   fromFileUrl,
