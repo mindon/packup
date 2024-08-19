@@ -7,7 +7,7 @@ import {
   parseJsonC,
   Plugin,
   resolve,
-  stop,
+  // stop,
   toFileUrl,
 } from "./deps.ts";
 import * as npmLocal from "./npm_local.ts";
@@ -18,7 +18,7 @@ export async function bundleByEsbuild(
   plugins?: Plugin[],
 ): Promise<string> {
   const importMapFile = getImportMap();
-  let importMapURL: URL | undefined;
+  let importMapURL: URL;
   if (importMapFile) {
     importMapURL = toFileUrl(resolve(importMapFile));
   }

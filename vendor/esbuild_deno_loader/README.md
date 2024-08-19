@@ -7,8 +7,8 @@ Deno module resolution for `esbuild`.
 This example bundles an entrypoint into a single ESM output.
 
 ```js
-import * as esbuild from "https://deno.land/x/esbuild@v0.14.51/mod.js";
-import { denoPlugin } from "https://deno.land/x/esbuild_deno_loader@0.5.2/mod.ts";
+import * as esbuild from "https://deno.land/x/esbuild@v0.23.1/mod.js";
+import { denoPlugin } from "https://deno.land/x/esbuild_deno_loader@0.9.0/mod.ts";
 
 await esbuild.build({
   plugins: [denoPlugin()],

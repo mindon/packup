@@ -4,12 +4,12 @@ import { logger } from "./logger_util.ts";
 import { byteSize } from "./util.ts";
 import { bundleByEsbuild } from "./bundle_util.ts";
 import { denoPlugin } from "./vendor/esbuild_deno_loader/mod.ts";
-import * as esbuild from "https://deno.land/x/esbuild@v0.15.11/mod.js";
+import * as esbuild from "https://deno.land/x/esbuild@v0.23.1/mod.js";
 import * as npmLocal from "./npm_local.ts";
 
 const bx =
   /\/\/[ \t]*!bundle=([^\r\n]+)\s*[\r\n]+\s*(?:export|import)[^;]+['"]([^'"]+)['"]\s*;\s*/g;
-const urlpath = /^https?:\/\//;
+const urlpath = /^(https?:\/\/|npm:)/i;
 export const fm: { [key: string]: string } = {};
 
 function urlSrc(u: string) {
@@ -51,8 +51,8 @@ export async function confRules(
   }
 
   for (const bi of bm) {
-    const isNPM = npmLocal.validSrc(bi[2]);
-    if (isNPM) {
+    const isNPMLocal = npmLocal.validSrc(bi[2]);
+    if (isNPMLocal) {
       if (bi[1] === "off") {
         bi[1] = "module";
       }
@@ -77,7 +77,7 @@ export async function confRules(
 
     const isURL = urlpath.test(bi[2]);
     if (isURL && bi[1] === "off") {
-      const flname = npmLocal.pure(bi[2]);
+      const flname = bi[2];
       fm[flname.replace(/[.]js$/, "")] = bi[2];
       if (!x[flname] && !flname.match(/\.ts$/)) {
         x[flname] = "off";
@@ -165,7 +165,7 @@ export const bundlet = async function (
     body.replace(
       /((?:^|\n)[ \t]*(?:export|import)[^"']+["'])([a-zA-Z][^"':]+)(["']\s*;)/g,
       (s, a, b, c) => {
-        if (b.startsWith(".") || /^https?:\/\//.test(b)) {
+        if (b.startsWith(".") || urlpath.test(b) || npmpath.test(b)) {
           return s;
         }
         return `${a}${base}/${b}${c}`;
@@ -191,13 +191,14 @@ export const bundlet = async function (
   }
 
   const rel = (t: string, flpath: string): string => {
-    if (!urlpath.test(t)) {
-      t = relative(
-        relative("src", dirname(flpath)),
-        t.replace(/^\//, ""),
-      );
+    if (/^(npm:|npm>:|http[s]?:\/\/)/i.test(t)) {
+      return t;
     }
-    if (t.indexOf("/") < 0 || (!/^http[s]?:\/\//.test(t) && !/^[.]/.test(t))) {
+    t = relative(
+      relative("src", dirname(flpath)),
+      t.replace(/^\//, ""),
+    );
+    if (t.indexOf("/") < 0 || !/^[.]/.test(t)) {
       t = `./${t}`;
     }
     return t;

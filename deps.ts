@@ -20,7 +20,7 @@ export {
   denoPlugins,
   denoResolverPlugin,
 } from "https://deno.land/x/esbuild_deno_loader/mod.ts";
-export { build, stop } from "https://deno.land/x/esbuild@v0.17.19/mod.js";
+export { build, stop } from "https://deno.land/x/esbuild@v0.23.1/mod.js";
 export type { CommonOptions, Plugin } from "https://deno.land/x/esbuild/mod.js";
 export { exists } from "https://deno.land/std/fs/mod.ts";
 
@@ -34,10 +34,10 @@ export { opn } from "https://raw.githubusercontent.com/hashrock/deno-opn/b358e4c
 export { serve as serveIterable } from "https://deno.land/x/iterable_file_server@v0.2.0/mod.ts";
 
 export const NAME = "packup";
-export const VERSION = "v0.2.3";
+export const VERSION = "v0.2.6";
 
-import { crypto } from "https://deno.land/std/crypto/mod.ts";
-import { encodeHex } from "https://deno.land/std/encoding/hex.ts";
+export { crypto } from "https://deno.land/std/crypto/mod.ts";
+export { encodeHex } from "https://deno.land/std/encoding/hex.ts";
 
 export const md5sum = async function (data: string | ArrayBuffer) {
   return encodeHex(

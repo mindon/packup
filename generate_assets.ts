@@ -31,7 +31,7 @@ import { bundleByEsbuild } from "./bundle_util.ts";
 import { logger } from "./logger_util.ts";
 import { compile as compileSass } from "./sass_util.ts";
 import { bundlet } from "./bundlet.ts";
-import * as esbuild from "https://deno.land/x/esbuild@v0.15.11/mod.js";
+import * as esbuild from "https://deno.land/x/esbuild@v0.23.1/mod.js";
 
 // get name and prefix from src
 function namePrefix(
@@ -118,10 +118,11 @@ export async function generateAssets(
     });
     for (const file of files) yield file;
     if (opts.mainAs404) {
-      yield Object.assign(
-        (await htmlAsset.createFileObject({ pageName, base, pathPrefix }))[0],
-        { name: "404", lastModified: 0 },
-      );
+      const file =
+        (await htmlAsset.createFileObject({ pageName, base, pathPrefix }))[0];
+      yield new File([await file.arrayBuffer()], "404", {
+        lastModified: 0,
+      });
     }
     logger.log(`${path} bundled in ${Date.now() - buildStarted}ms`);
 
@@ -394,7 +395,7 @@ class ScriptAsset implements Asset {
     let info = {};
     try {
       info = await Deno.stat(flpath);
-    } catch(err) {
+    } catch (err) {
       console.debug(base, src, flpath, pathPrefix, distDir);
       throw err;
     }

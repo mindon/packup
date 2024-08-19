@@ -1,17 +1,22 @@
 import {
   basename,
+  crypto,
   Document,
   Element,
   fromFileUrl,
-  md5sum,
   MuxAsyncIterator,
 } from "./deps.ts";
 
 export const decoder = new TextDecoder();
 export const encoder = new TextEncoder();
 
-export async function md5(data: string | ArrayBuffer) {
-  return await md5sum(data);
+export function md5(data: string | ArrayBuffer): string {
+  const digest = crypto.subtle.digestSync(
+    "MD5",
+    typeof data === "string" ? new TextEncoder().encode(data) : data,
+  );
+  const byteArray = Array.from(new Uint8Array(digest));
+  return byteArray.map((byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
 export async function getDependencies(path: string): Promise<string[]> {
