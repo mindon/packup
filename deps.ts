@@ -19,14 +19,14 @@ export {
   denoPlugins,
   denoResolverPlugin,
 } from "jsr:@luca/esbuild-deno-loader";
-export { build, stop } from "https://deno.land/x/esbuild@v0.23.1/mod.js";
+export { build, stop } from "https://deno.land/x/esbuild@v0.17.19/mod.js";
 export type {
   BuildOptions,
   CommonOptions,
   OnResolveArgs,
   Plugin,
   PluginBuild,
-} from "https://deno.land/x/esbuild@v0.23.1/mod.js";
+} from "https://deno.land/x/esbuild@v0.17.19/mod.js";
 export { Document, DOMParser, Element } from "jsr:@b-fuze/deno-dom/wasm";
 
 export { opn } from "https://raw.githubusercontent.com/hashrock/deno-opn/b358e4c7df5d1c6d5e634d2730ca491ba6062782/opn.ts";
