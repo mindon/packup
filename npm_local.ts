@@ -1,6 +1,11 @@
-import { basename, join } from "./deps.ts";
-import * as path from "https://deno.land/std/path/mod.ts";
-import * as esbuild from "https://deno.land/x/esbuild@v0.17.19/mod.js";
+import {
+  basename,
+  dirname,
+  join,
+  OnResolveArgs,
+  Plugin,
+  PluginBuild,
+} from "./deps.ts";
 
 import { fm } from "./bundlet.ts";
 
@@ -89,6 +94,7 @@ const xnpm = /^(src\/)?(npm>:)/i;
 
 async function handlers(req: any) {
   const url = new URL(req.url.replace(/\/cjs\//g, "/esm/"));
+
   const flpath = found(
     decodeURIComponent(url.pathname.substring(1)),
     rootDir,
@@ -97,7 +103,7 @@ async function handlers(req: any) {
     return new Response("404 Not Found", { status: 404 });
   }
   const body = await Deno.readTextFile(flpath);
-  const base = path.dirname(flpath);
+  const base = dirname(flpath);
   const result = body.replace(xfrom, (s, m1, m2, m3) => {
     if (m2.startsWith(".") && ext.test(m2)) {
       return s;
@@ -143,7 +149,7 @@ export const resolveSrc = (src: string) => {
   if (!validSrc(src)) {
     return src;
   }
-  return `http://localhost:${port}/${src.replace(xnpm, "")}`;
+  return `http://localhost:${port}/${src.replace(xnpm, "")}?${Math.random()}`;
 };
 
 export const target = (target: string) => {
@@ -164,8 +170,8 @@ export function pure(src: string) {
 
 export const resolve = {
   name: "npm-local-modules",
-  setup(build: esbuild.PluginBuild) {
-    build.onResolve({ filter: xnpm }, (args: esbuild.OnResolveArgs) => {
+  setup(build: PluginBuild) {
+    build.onResolve({ filter: xnpm }, (args: OnResolveArgs) => {
       const name = pure(args.path).replace(/\.js$/, "");
       if (fm[name]) {
         return { path: fm[name], external: true };
@@ -179,4 +185,4 @@ export const resolve = {
       };
     });
   },
-} as esbuild.Plugin;
+} as Plugin;

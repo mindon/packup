@@ -18,7 +18,7 @@ export async function bundleByEsbuild(
   plugins?: Plugin[],
 ): Promise<string> {
   const importMapFile = getImportMap();
-  let importMapURL: URL;
+  let importMapURL: URL | null = null;
   if (importMapFile) {
     importMapURL = toFileUrl(resolve(importMapFile));
   }
@@ -60,7 +60,7 @@ export async function bundleByEsbuild(
   if (!plugins) plugins = [];
   plugins.push(npmLocal.resolve);
   plugins.push(denoResolverPlugin({
-    importMapURL,
+    importMapURL: importMapURL?.toString(),
   }));
   plugins = plugins.concat(denoPlugins());
   const entryPoint = /^https?:\/\//.test(path)
@@ -81,6 +81,9 @@ export async function bundleByEsbuild(
       jsxImportSource,
       format: "esm",
       platform: "browser",
+      supported: {
+        decorators: false,
+      },
       ...(options || {}),
     });
     return bundle.outputFiles![0].text;

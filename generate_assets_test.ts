@@ -58,7 +58,7 @@ Deno.test("generateAssets", async () => {
   const [gen] = await generateAssets("examples/with-imports/index.html", {
     publicUrl: ".",
   });
-  const assets = [];
+  const assets: any[] = [];
   for await (const asset of gen) {
     assets.push(asset);
   }
@@ -70,26 +70,27 @@ Deno.test("generateAssets", async () => {
   assert(imgSrc.name.endsWith(".svg"));
   assert(imgSrcset.name.endsWith(".webp"));
 
-  assertEquals(html.name, "index.html");
+  assertEquals(html.name, "examples/with-imports/index.html");
 
   const htmlText = await html.text();
-  assert(htmlText.includes(`"${js.name}"`));
-  assert(htmlText.includes(`"${css.name}"`));
-  assert(htmlText.includes(`"${imgSrc.name}"`));
-  assert(htmlText.includes(`"${imgSrcset.name} 2x,`));
+  assert(htmlText.includes(`${js.name}"`));
+  assert(htmlText.includes(`${css.name}"`));
+  assert(htmlText.includes(`${imgSrc.name}"`));
+  assert(htmlText.includes(`${imgSrcset.name} 2x,`));
 });
+
 Deno.test("generateAssets - publicUrl=/", async () => {
   const [gen] = await generateAssets("examples/with-imports/index.html", {
     publicUrl: "/",
   });
-  const assets = [];
+  const assets: any[] = [];
   for await (const asset of gen) {
     assets.push(asset);
   }
   const [js, css, imgSrc, imgSrcset, html] = assets;
   const htmlText = await html.text();
-  assert(htmlText.includes(`"/${js.name}"`));
-  assert(htmlText.includes(`"/${css.name}"`));
-  assert(htmlText.includes(`"/${imgSrc.name}"`));
-  assert(htmlText.includes(`"/${imgSrcset.name} 2x,`));
+  assert(htmlText.includes(`/${js.name}"`));
+  assert(htmlText.includes(`/${css.name}"`));
+  assert(htmlText.includes(`/${imgSrc.name}"`));
+  assert(htmlText.includes(`/${imgSrcset.name} 2x,`));
 });

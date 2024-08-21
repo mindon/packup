@@ -1,10 +1,5 @@
 import { livereloadServer } from "./livereload_server.ts";
-import {
-  assert,
-  assertEquals,
-  assertStringIncludes,
-  deferred,
-} from "./test_deps.ts";
+import { assert, assertEquals, assertStringIncludes } from "./test_deps.ts";
 
 Deno.test("livereloadServer", async () => {
   const port = 34567;
@@ -19,11 +14,12 @@ Deno.test("livereloadServer", async () => {
     assertStringIncludes(text, `new WebSocket("${wsURL}/livereload")`);
 
     // Livereload server should accept websocket requests
-    const done = deferred<void>();
+    const { promise, resolve, reject } = Promise.withResolvers<void>();
+    const done = promise;
     let receivedMessage: string | undefined;
     const ws = new WebSocket(`${wsURL}/livereload`);
     // Livereload server automatically closes a websocket connection when 'built' event is dispatched
-    ws.onclose = () => done.resolve();
+    ws.onclose = () => resolve();
     ws.onopen = async () => {
       await new Promise((resolve) => setTimeout(resolve, 200));
       eventtarget.dispatchEvent(new Event("built"));
@@ -31,7 +27,7 @@ Deno.test("livereloadServer", async () => {
     ws.onmessage = (ev: MessageEvent<string>) => {
       receivedMessage = ev.data;
     };
-    ws.onerror = (ev) => done.reject(ev);
+    ws.onerror = (ev) => reject(ev);
 
     await done;
     assert(receivedMessage);

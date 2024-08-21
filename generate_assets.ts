@@ -11,6 +11,7 @@
  */
 import {
   basename,
+  BuildOptions,
   dirname,
   Document,
   DOMParser,
@@ -31,7 +32,6 @@ import { bundleByEsbuild } from "./bundle_util.ts";
 import { logger } from "./logger_util.ts";
 import { compile as compileSass } from "./sass_util.ts";
 import { bundlet } from "./bundlet.ts";
-import * as esbuild from "https://deno.land/x/esbuild@v0.17.19/mod.js";
 
 // get name and prefix from src
 function namePrefix(
@@ -158,7 +158,7 @@ export async function* watchAndGenAssets(
   const pure = /.*\/([^/]+)\.[a-z\d]{32}(\.[a-z\d]{2,})$/;
   const jsext = /\.js$/i;
   while (true) {
-    const c = {};
+    const c: any = {};
     for await (const file of assets) {
       c[file.name.replace(pure, "$1$2")] = true;
       yield file;
@@ -169,7 +169,7 @@ export async function* watchAndGenAssets(
       if (!jsext.test(name) || c[name.substring(i < 0 ? 0 : i + 1)]) {
         continue;
       }
-      const files = await new ScriptAsset(relative("src", name), null)
+      const files = await new ScriptAsset(relative("src", name))
         .createFileObject(jsopts);
       for (let i = 0, imax = files.length; i < imax; i++) {
         if (files[i]?.name) {
@@ -195,7 +195,7 @@ type CreateFileObjectParams = {
   base: string;
   pathPrefix: string;
   distDir?: string;
-  options?: esbuild.BuildOptions;
+  options?: BuildOptions;
 };
 
 type Asset = {
@@ -241,7 +241,10 @@ class HtmlAsset implements Asset {
   createFileObject(_params: CreateFileObjectParams) {
     const { name } = namePrefix(this.base, this.#path);
     return Promise.resolve([Object.assign(
-      new Blob([docType, encoder.encode(this.#doc.documentElement!.outerHTML)]),
+      new Blob([
+        docType,
+        encoder.encode(this.#doc.documentElement!.outerHTML),
+      ]) as any,
       {
         name,
         lastModified: (Deno.statSync(this.#path).mtime?.getTime() ?? 0) / 1000,
@@ -307,7 +310,7 @@ class CssAsset implements Asset {
     this._dest = `${name}.${await md5(data)}.css`;
     this._el.setAttribute("href", join(prefix || pathPrefix, this._dest));
     return [
-      Object.assign(new Blob([data]), {
+      Object.assign(new Blob([data]) as any, {
         name: this._dest,
         lastModified: (info.mtime?.getTime() ?? 0) / 1000,
       }),
@@ -328,10 +331,15 @@ class ScssAsset extends CssAsset {
     const { name, prefix } = namePrefix(base, flpath);
     this._dest = `${name}.${await md5(scss)}.css`;
     this._el.setAttribute("href", join(prefix || pathPrefix, this._dest));
-    return [Object.assign(new Blob([await compileSass(decoder.decode(scss))]), {
-      name: this._dest,
-      lastModified: (info.mtime?.getTime() ?? 0) / 1000,
-    })];
+    return [
+      Object.assign(
+        new Blob([await compileSass(decoder.decode(scss))]) as any,
+        {
+          name: this._dest,
+          lastModified: (info.mtime?.getTime() ?? 0) / 1000,
+        },
+      ),
+    ];
   }
 }
 
@@ -353,9 +361,9 @@ class ScriptAsset implements Asset {
 
   #src: string;
   #dest?: string;
-  #el: Element;
+  #el?: Element;
 
-  constructor(src: string, script: Element) {
+  constructor(src: string, script?: Element) {
     this.#src = src;
     this.#el = script;
   }
@@ -363,7 +371,6 @@ class ScriptAsset implements Asset {
   async getWatchPaths(base: string): Promise<string[]> {
     let src = this.#src;
     const i = src.indexOf("?");
-    const search = i > -1 ? src.substring(i) : "";
     if (i > -1) {
       src = src.substring(0, i);
     }
@@ -392,7 +399,7 @@ class ScriptAsset implements Asset {
     }
 
     const flpath = join(base, src);
-    let info = {};
+    let info: any = {};
     try {
       info = await Deno.stat(flpath);
     } catch (err) {
@@ -403,13 +410,13 @@ class ScriptAsset implements Asset {
     const { options, plugins } = await bundlet(flpath, pathPrefix, distDir);
     const data = await bundleByEsbuild(flpath, options, plugins);
     const { name, prefix } = namePrefix(base, flpath);
-    this.#dest = `${name}.${await md5(data)}.js`;
+    this.#dest = `${name}.${md5(data)}.js`;
     this.#el?.setAttribute(
       "src",
       join(prefix || pathPrefix, this.#dest) + search,
     );
     return [
-      Object.assign(new Blob([data]), {
+      Object.assign(new Blob([data]) as any, {
         name: this.#dest,
         lastModified: (info.mtime?.getTime() ?? 0) / 1000,
       }),
@@ -433,11 +440,11 @@ class ImageAsset implements Asset {
     if (src && isLocalUrl(src) && !src.startsWith("data:")) sources.push(src);
     if (srcset) {
       sources.push(
-        ...srcset.filter((src) => !src.startsWith("data:"))
+        ...srcset
           .split(",") // Separate the different srcset
-          .filter(Boolean) // Remove empty strings
-          .map((src) => src.trim()) // Remove white spaces
-          .map((src) => src.split(" ")[0]) // Separate the source from the size
+          .filter((src: string) => src && !src.startsWith("data:")) // Remove empty strings
+          .map((src: string) => src.trim()) // Remove white spaces
+          .map((src: string) => src.split(" ")[0]) // Separate the source from the size
           .filter(isLocalUrl), // Remove external references
       );
     }
@@ -445,7 +452,7 @@ class ImageAsset implements Asset {
     // Remove duplicates
     sources = [
       ...new Set(
-        sources.filter((d) =>
+        sources.filter((src) =>
           !src.startsWith("data:") && src.indexOf("{{") < 0
         ),
       ),
@@ -529,7 +536,7 @@ class ImageAsset implements Asset {
 
       const info = await Deno.stat(flpath);
       files.push(
-        Object.assign(new Blob([data]), {
+        Object.assign(new Blob([data]) as any, {
           name: dest,
           lastModified: (info.mtime?.getTime() ?? 0) / 1000,
         }),

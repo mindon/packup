@@ -79,7 +79,7 @@ async function createStaticAssetFromPath(
   const bytes = await Deno.readFile(path);
   const info = await Deno.stat(path);
   const webkitRelativePath = relative(root, path);
-  return Object.assign(new Blob([bytes]), {
+  return Object.assign(new Blob([bytes]) as any, {
     name: join(distPrefix, webkitRelativePath),
     lastModified: (info.mtime?.getTime() ?? 0) / 1000,
     // webkitRelativePath,

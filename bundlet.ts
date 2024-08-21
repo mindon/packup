@@ -1,10 +1,19 @@
-import { basename, dirname, ensureDir, join, relative } from "./deps.ts";
+import {
+  basename,
+  BuildOptions,
+  denoPlugins,
+  dirname,
+  ensureDir,
+  join,
+  OnResolveArgs,
+  Plugin,
+  PluginBuild,
+  relative,
+} from "./deps.ts";
 import { md5 } from "./util.ts";
 import { logger } from "./logger_util.ts";
 import { byteSize } from "./util.ts";
 import { bundleByEsbuild } from "./bundle_util.ts";
-import { denoPlugin } from "./vendor/esbuild_deno_loader/mod.ts";
-import * as esbuild from "https://deno.land/x/esbuild@v0.17.19/mod.js";
 import * as npmLocal from "./npm_local.ts";
 
 const bx =
@@ -96,7 +105,8 @@ export async function confRules(
     let data = "";
     let { options, plugins } = await bundlet(src, pathPrefix, distDir, mx);
     if (!plugins) plugins = [];
-    plugins.concat(npmLocal.resolve, denoPlugin());
+    plugins = plugins.concat(npmLocal.resolve);
+    plugins = plugins.concat(denoPlugins());
     data = await bundleByEsbuild(src, options, plugins);
 
     let base = join(
@@ -153,7 +163,7 @@ export const bundlet = async function (
   pathPrefix: string,
   distDir?: string,
   mappings?: { [name: string]: string },
-): Promise<{ options?: esbuild.BuildOptions; plugins?: esbuild.Plugin[] }> {
+): Promise<{ options?: BuildOptions; plugins?: Plugin[] }> {
   if (!distDir) {
     return {};
   }
@@ -165,7 +175,7 @@ export const bundlet = async function (
     body.replace(
       /((?:^|\n)[ \t]*(?:export|import)[^"']+["'])([a-zA-Z][^"':]+)(["']\s*;)/g,
       (s, a, b, c) => {
-        if (b.startsWith(".") || urlpath.test(b) || npmpath.test(b)) {
+        if (b.startsWith(".") || urlpath.test(b)) {
           return s;
         }
         return `${a}${base}/${b}${c}`;
@@ -175,7 +185,7 @@ export const bundlet = async function (
     body = await Deno.readTextFile(flpath);
   }
 
-  const options: esbuild.BuildOptions = { platform: "browser", format: "esm" };
+  const options: BuildOptions = { platform: "browser", format: "esm" };
   if (!distDir) distDir = "dist";
   const { x, dirs, names } = await confRules(body, {
     flpath,
@@ -204,12 +214,12 @@ export const bundlet = async function (
     return t;
   };
 
-  const ignores = (): esbuild.Plugin => ({
+  const ignores = (): Plugin => ({
     name: "bundlet-keep-imports",
-    setup(build: esbuild.PluginBuild) {
+    setup(build: PluginBuild) {
       build.onResolve({
         filter: namesFilter(names),
-      }, (args: esbuild.OnResolveArgs) => {
+      }, (args: OnResolveArgs) => {
         let target = args.path;
         const name = basename(target);
         const key = name.replace(
