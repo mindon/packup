@@ -1,5 +1,8 @@
 {
   "lock": false,
+  "imports": {
+    "https://deno.land/x/denoflate@1.2.1/": "https://raw.githubusercontent.com/hazae41/foras/master/src/deno/"
+  },
   "fmt": {
     "exclude": [
       "docs",
