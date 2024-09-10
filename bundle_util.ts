@@ -35,6 +35,7 @@ export async function bundleByEsbuild(
   if (tsconfigFile) {
     const config = <{
       compilerOptions: {
+        useDefineForClassFields: false,
         experimentalDecorators: true;
         jsx: CommonOptions["jsx"];
         jsxFactory: CommonOptions["jsxFactory"];

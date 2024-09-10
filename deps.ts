@@ -19,18 +19,18 @@ export {
   denoPlugins,
   denoResolverPlugin,
 } from "jsr:@luca/esbuild-deno-loader";
-export { build, stop } from "https://deno.land/x/esbuild@v0.17.19/mod.js";
+export { build, stop } from "https://raw.githubusercontent.com/esbuild/deno-esbuild/v0.17.19/mod.js";
 export type {
   BuildOptions,
   CommonOptions,
   OnResolveArgs,
   Plugin,
   PluginBuild,
-} from "https://deno.land/x/esbuild@v0.17.19/mod.js";
+} from "https://raw.githubusercontent.com/esbuild/deno-esbuild/v0.17.19/mod.js";
 export { Document, DOMParser, Element } from "jsr:@b-fuze/deno-dom/wasm";
 
 export { opn } from "https://raw.githubusercontent.com/hashrock/deno-opn/b358e4c7df5d1c6d5e634d2730ca491ba6062782/opn.ts";
-export { serve as serveIterable } from "https://deno.land/x/iterable_file_server@v0.2.0/mod.ts";
+export { serve as serveIterable } from "https://raw.githubusercontent.com/kt3k/iterable_file_server/main/mod.ts";
 
 export const NAME = "packup";
 export const VERSION = "v0.2.6";
